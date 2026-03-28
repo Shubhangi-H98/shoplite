@@ -102,8 +102,7 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 flutter_native_splash:
-  color: "#ffffff" # Aapka brand background color
-  image: assets/images/logo.png # Agar logo hai toh, varna icon use karein
+  color: "#673AB7"
+  # image: assets/images/logo.png
   android_12:
-    color: "#ffffff"
-    icon_background_color: "#ffffff"
+    color: "#673AB7"
