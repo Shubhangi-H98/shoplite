@@ -1,8 +1,10 @@
 
+import 'package:shoplite/features/catalog/domain/repositories/product_repository.dart';
+
 import '../../../../core/network/api_client.dart';
 import '../../data/models/product_model.dart';
 import '../../domain/entities/product.dart';
-import '../../domain/repositories/product_repository.dart';
+
 
 
 class ProductRepositoryImpl implements ProductRepository {
