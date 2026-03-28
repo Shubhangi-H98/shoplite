@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/presentation/cubit/catalog_cubit.dart';
 import '../../../catalog/presentation/cubit/catalog_state.dart';
 import '../../../splash/presentation/widgets/home_header.dart';
 
-class CatalogPage extends StatelessWidget {
+class CatalogPage extends StatefulWidget {
   const CatalogPage({super.key});
+
+  @override
+  State<CatalogPage> createState() => _CatalogPageState();
+}
+
+class _CatalogPageState extends State<CatalogPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    // 2. Scroll listener add karein
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        print("Reach at the end! Fetching more...");
+        // context.read<CatalogCubit>().fetchMoreProducts(); // Future Step
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,32 +41,51 @@ class CatalogPage extends StatelessWidget {
         child: BlocBuilder<CatalogCubit, CatalogState>(
           builder: (context, state) {
             return CustomScrollView(
-              physics: const BouncingScrollPhysics(), // Premium scroll feel
+              controller: _scrollController, // <-- Step 1: Controller yahan attach karein
+              physics: const BouncingScrollPhysics(),
               slivers: [
-                // 1. Header & Static Content
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                // 1. Header Section
+                const SliverPadding(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  sliver: SliverToBoxAdapter(child: HomeHeader()),
+                ),
+
+                // 2. Search Bar Section
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  sliver: SliverToBoxAdapter(child: _buildSearchBar()),
+                ),
+
+                // 3. Categories Label & List
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  sliver: SliverToBoxAdapter(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const HomeHeader(),
-                        const SizedBox(height: 20),
-                        _buildSearchBar(),
-                        const SizedBox(height: 24),
                         _buildSectionHeader("Categories"),
                         const SizedBox(height: 12),
                         _buildCategoryList(),
-                        const SizedBox(height: 24),
-                        _buildPromoBanner(),
-                        const SizedBox(height: 24),
-                        _buildSectionHeader("Popular Product"),
                       ],
                     ),
                   ),
                 ),
 
-                // 2. Conditional Logic for Product Grid
+                // 4. Promo Banner
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  sliver: SliverToBoxAdapter(child: _buildPromoBanner()),
+                ),
+
+                // 5. Popular Product Title
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  sliver: SliverToBoxAdapter(
+                    child: _buildSectionHeader("Popular Product"),
+                  ),
+                ),
+
+                // 6. Responsive Product Grid (Existing Logic)
                 if (state is CatalogLoading)
                   const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator(color: Colors.orange)),
@@ -59,7 +98,7 @@ class CatalogPage extends StatelessWidget {
                         crossAxisCount: crossAxisCount,
                         mainAxisSpacing: 16,
                         crossAxisSpacing: 16,
-                        childAspectRatio: 0.72, // Balanced card height
+                        childAspectRatio: 0.72,
                       ),
                       delegate: SliverChildBuilderDelegate(
                             (context, index) => _buildProductCard(context, state.products[index]),
@@ -91,8 +130,15 @@ class CatalogPage extends StatelessWidget {
   }
 
   // --- UI Helper Methods ---
-
   Widget _buildProductCard(BuildContext context, Product product) {
+
+    final double indianPrice = product.price * 83;
+    final String formattedPrice = NumberFormat.currency(
+      locale: 'en_IN', // Indian style formatting (commas)
+      symbol: '₹',     // Rupee symbol
+      decimalDigits: 0, // Paisa nahi dikhana
+    ).format(indianPrice);
+
     return GestureDetector(
       onTap: () {
         // Navigate to details (Next Step)
@@ -153,7 +199,7 @@ class CatalogPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '\$${product.price}',
+                        formattedPrice,
                         style: const TextStyle(
                           color: Colors.orange,
                           fontWeight: FontWeight.bold,
