@@ -1,7 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'core/network/api_client.dart';
-import 'features/catalog/domain/repositories/product_repository.dart';
-import 'features/catalog/domain/repositories/product_repository_impl.dart';
+import 'features/catalog/domain/repository/product_repository.dart';
+import 'features/catalog/data/repositories/product_repository_impl.dart';
+
 
 final sl = GetIt.instance;
 

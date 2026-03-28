@@ -1,4 +1,5 @@
-import '../entities/product.dart';
+import '../../domain/entities/product.dart';
+
 
 abstract class ProductRepository {
   /// Fetches a list of products with pagination.
