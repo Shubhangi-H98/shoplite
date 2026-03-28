@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../dashboard/presentation/pages/dashboard_page.dart';
 // Note: We will import CatalogPage once we create it in the next step
 // import '../../catalog/presentation/pages/catalog_page.dart';
 
@@ -23,6 +25,10 @@ class _SplashPageState extends State<SplashPage> {
       // For now, we stay on this page or show a message
       // because CatalogPage is not yet created.
       debugPrint("Splash finished, ready to navigate!");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+      );
     }
   }
 

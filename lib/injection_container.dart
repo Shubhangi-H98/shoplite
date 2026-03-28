@@ -19,8 +19,4 @@ Future<void> init() async {
   // Core: Registering ApiClient as a Singleton.
   sl.registerLazySingleton(() => ApiClient());
 
-  // Features - Catalog: Repository registration.
-  sl.registerLazySingleton<ProductRepository>(
-        () => ProductRepositoryImpl(sl()),
-  );
 }
