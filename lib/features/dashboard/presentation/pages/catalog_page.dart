@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -16,6 +18,7 @@ class CatalogPage extends StatefulWidget {
 
 class _CatalogPageState extends State<CatalogPage> {
   final ScrollController _scrollController = ScrollController();
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -27,6 +30,13 @@ class _CatalogPageState extends State<CatalogPage> {
         // context.read<CatalogCubit>().fetchMoreProducts(); // Future Step
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -224,8 +234,14 @@ class _CatalogPageState extends State<CatalogPage> {
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(15),
       ),
-      child: const TextField(
-        decoration: InputDecoration(
+      child: TextField(
+        onChanged: (value) {
+          if (_debounce?.isActive ?? false) _debounce!.cancel();
+          _debounce = Timer(const Duration(milliseconds: 500), () {
+            context.read<CatalogCubit>().searchProducts(value);
+          });
+        },
+        decoration: const InputDecoration(
           hintText: 'Search for products...',
           prefixIcon: Icon(Icons.search, color: Colors.grey),
           suffixIcon: Icon(Icons.tune, color: Colors.orange),

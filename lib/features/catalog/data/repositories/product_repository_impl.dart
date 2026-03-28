@@ -23,14 +23,24 @@ class ProductRepositoryImpl implements ProductRepository {
     return data.map((json) => ProductModel.fromJson(json)).toList();
   }
 
+  // @override
+  // Future<List<Product>> searchProducts(String query) async {
+  //   final response = await apiClient.get(
+  //     '/products/search',
+  //     queryParameters: {'q': query},
+  //   );
+  //
+  //   final List data = response.data['products'];
+  //   return data.map((json) => ProductModel.fromJson(json)).toList();
+  // }
   @override
   Future<List<Product>> searchProducts(String query) async {
-    final response = await apiClient.get(
-      '/products/search',
-      queryParameters: {'q': query},
-    );
-
-    final List data = response.data['products'];
-    return data.map((json) => ProductModel.fromJson(json)).toList();
+    try {
+      final response = await apiClient.get('/products/search?q=$query');
+      final List data = response.data['products'];
+      return data.map((json) => ProductModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception("Search failed: $e");
+    }
   }
 }

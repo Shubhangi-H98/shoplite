@@ -17,4 +17,21 @@ class CatalogCubit extends Cubit<CatalogState> {
       emit(CatalogError(e.toString()));
     }
   }
+  Future<void> searchProducts(String query) async {
+    if (query.isEmpty) {
+      return fetchProducts(); // Reset to default products
+    }
+
+    emit(CatalogLoading());
+    try {
+      final results = await repository.searchProducts(query);
+      if (results.isEmpty) {
+        emit(CatalogError("No products found for '$query'"));
+      } else {
+        emit(CatalogLoaded(products: results));
+      }
+    } catch (e) {
+      emit(CatalogError(e.toString()));
+    }
+  }
 }
