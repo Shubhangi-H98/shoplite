@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../cart/presentation/pages/cart_page.dart';
+import '../../../catalog/presentation/pages/favorites_page.dart';
 import 'catalog_page.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -15,6 +17,8 @@ class _DashboardPageState extends State<DashboardPage> {
   // List of pages to display in the dashboard
   final List<Widget> _pages = [
     const CatalogPage(),
+    const CartPage(),
+    const FavoritesPage(),
     const Center(child: Text('Categories - Coming Soon')),
     const Center(child: Text('Cart - Empty')),
     const Center(child: Text('Profile - Login Required')),

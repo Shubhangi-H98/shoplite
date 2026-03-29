@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../dashboard/presentation/pages/dashboard_page.dart';
-// Note: We will import CatalogPage once we create it in the next step
-// import '../../catalog/presentation/pages/catalog_page.dart';
-
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
 
@@ -22,13 +18,9 @@ class _SplashPageState extends State<SplashPage> {
   void _navigateToHome() async {
     await Future.delayed(const Duration(seconds: 3));
     if (mounted) {
-      // For now, we stay on this page or show a message
-      // because CatalogPage is not yet created.
-      debugPrint("Splash finished, ready to navigate!");
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
-      );
+
+      debugPrint("Splash finished, navigating to Login...");
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -40,26 +32,30 @@ class _SplashPageState extends State<SplashPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App Logo or Icon
+            // 1. App Logo/Icon - Updated to Orange
             const Icon(
               Icons.shopping_bag_outlined,
-              size: 80,
-              color: Colors.deepPurple,
+              size: 100,
+              color: Colors.orange,
             ),
-            const SizedBox(height: 20),
-            // App Name
-            Text(
+            const SizedBox(height: 24),
+
+            // 2. App Name - Updated to Orange
+            const Text(
               'ShopLite',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              style: TextStyle(
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
+                color: Colors.orange,
+                letterSpacing: 1.2,
               ),
             ),
-            const SizedBox(height: 10),
-            // Subtitle or Loader
+            const SizedBox(height: 40),
+
+            // 3. Professional Loader - Updated to Orange
             const CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
             ),
           ],
         ),

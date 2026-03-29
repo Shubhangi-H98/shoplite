@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/presentation/cubit/catalog_cubit.dart';
 import '../../../catalog/presentation/cubit/catalog_state.dart';
+import '../../../product_detail/presentation/pages/product_detail_page.dart';
 import '../../../splash/presentation/widgets/home_header.dart';
 
 class CatalogPage extends StatefulWidget {
@@ -51,7 +52,7 @@ class _CatalogPageState extends State<CatalogPage> {
         child: BlocBuilder<CatalogCubit, CatalogState>(
           builder: (context, state) {
             return CustomScrollView(
-              controller: _scrollController, // <-- Step 1: Controller yahan attach karein
+              controller: _scrollController,
               physics: const BouncingScrollPhysics(),
               slivers: [
                 // 1. Header Section
@@ -144,14 +145,19 @@ class _CatalogPageState extends State<CatalogPage> {
 
     final double indianPrice = product.price * 83;
     final String formattedPrice = NumberFormat.currency(
-      locale: 'en_IN', // Indian style formatting (commas)
-      symbol: '₹',     // Rupee symbol
-      decimalDigits: 0, // Paisa nahi dikhana
+      locale: 'en_IN',
+      symbol: '₹',
+      decimalDigits: 0,
     ).format(indianPrice);
 
     return GestureDetector(
       onTap: () {
-        // Navigate to details (Next Step)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailPage(product: product),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -174,10 +180,13 @@ class _CatalogPageState extends State<CatalogPage> {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                    child: Image.network(
-                      product.thumbnail,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
+                    child: Hero(
+                      tag: 'product-${product.id}',
+                      child: Image.network(
+                        product.thumbnail,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      ),
                     ),
                   ),
                   Positioned(
