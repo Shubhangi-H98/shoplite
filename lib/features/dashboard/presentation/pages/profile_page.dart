@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../cart/presentation/cubit/favorites_cubit.dart';
 import '../../../cart/presentation/cubit/order_cubit.dart';
+import '../../../cart/presentation/cubit/profile_picture_cubit.dart';
 import '../cubit/navigation_cubit.dart';
 import 'edit_address_page.dart';
 import 'payment_methods_page.dart';
@@ -30,6 +33,17 @@ class _ProfilePageState extends State<ProfilePage> {
     if (mounted) setState(() => _savedAddress = address);
   }
 
+  // 🛠️ Image Picker logic
+  Future<void> _pickImage(BuildContext context) async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (!context.mounted) return;
+    if (image != null) {
+      context.read<ProfilePictureCubit>().updateProfilePicture(image.path);
+    }
+  }
+
+  // profile_page.dart
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,89 +59,63 @@ class _ProfilePageState extends State<ProfilePage> {
         builder: (context, authState) {
           String name = "Guest User";
           String email = "Not Logged In";
-
           if (authState is AuthAuthenticated) {
             name = authState.userName;
             email = authState.userEmail;
           }
 
-          return Column(
+          return ListView(
+            padding: const EdgeInsets.symmetric(vertical: 20),
             children: [
-              const SizedBox(height: 20),
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: Colors.orange,
-                child: Text(
-                  name.isNotEmpty ? name[0].toUpperCase() : "U",
-                  style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold),
+              // Profile Image Section
+              Center(
+                child: GestureDetector(
+                  onTap: () => _pickImage(context),
+                  child: BlocBuilder<ProfilePictureCubit, ProfilePictureState>(
+                    builder: (context, state) {
+                      return CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.orange,
+                        backgroundImage: state.imagePath != null ? FileImage(File(state.imagePath!)) : null,
+                        child: state.imagePath == null
+                            ? Text(name.isNotEmpty ? name[0].toUpperCase() : "U",
+                            style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold))
+                            : null,
+                      );
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
-              Text(name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              Text(email, style: const TextStyle(color: Colors.grey)),
+              Text(name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              Text(email, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 30),
 
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildMenuTile(Icons.shopping_bag_outlined, "My Orders", () {
-                      context.read<NavigationCubit>().changeTab(1);
-                    }),
-
-                    // 1. Dynamic Wishlist Count
-                    BlocBuilder<FavoritesCubit, List>(
-                      builder: (context, favs) => _buildMenuTile(
-                        Icons.favorite_border,
-                        "Wishlist",
-                            () => context.read<NavigationCubit>().changeTab(2),
-                        trailingText: favs.isNotEmpty ? "${favs.length} Items" : "0 Items",
-                      ),
-                    ),
-
-                    // 2. 🟢 Dynamic Shipping Address (Navigation Added)
-                    _buildMenuTile(
-                      Icons.location_on_outlined,
-                      "Shipping Address",
-                          () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const EditAddressPage()),
-                        );
-                        if (result == true) _loadAddress();
-                      },
-                      trailingText: _savedAddress != null
-                          ? (_savedAddress!.length > 15 ? "${_savedAddress!.substring(0, 15)}..." : _savedAddress)
-                          : "No address saved",
-                    ),
-
-                    // 3. 🟢 Dynamic Payment Method (Navigation Added)
-                    BlocBuilder<OrderCubit, List<OrderModel>>(
-                      builder: (context, orders) {
-                        String lastPayment = orders.isNotEmpty ? orders.first.paymentMethod : "None";
-                        return _buildMenuTile(
-                          Icons.payment_outlined,
-                          "Payment Methods",
-                              () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const PaymentMethodsPage()),
-                            );
-                          },
-                          trailingText: lastPayment,
-                        );
-                      },
-                    ),
-
-                    const Divider(),
-                    _buildMenuTile(
-                      Icons.logout,
-                      "Logout",
-                          () => _showLogoutDialog(context),
-                      textColor: Colors.red,
-                    ),
-                  ],
+              // Menu Tiles
+              _buildMenuTile(Icons.shopping_bag_outlined, "My Orders", () {
+                context.read<NavigationCubit>().changeTab(1);
+              }),
+              BlocBuilder<FavoritesCubit, List>(
+                builder: (context, favs) => _buildMenuTile(
+                  Icons.favorite_border, "Wishlist",
+                      () => context.read<NavigationCubit>().changeTab(2),
+                  trailingText: "${favs.length} Items",
                 ),
               ),
+              _buildMenuTile(Icons.location_on_outlined, "Shipping Address", () async {
+                final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const EditAddressPage()));
+                if (result == true) _loadAddress();
+              }, trailingText: _savedAddress ?? "No address saved"),
+              BlocBuilder<OrderCubit, List<OrderModel>>(
+                builder: (context, orders) {
+                  String lastPayment = orders.isNotEmpty ? orders.first.paymentMethod : "None";
+                  return _buildMenuTile(Icons.payment_outlined, "Payment Methods", () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentMethodsPage()));
+                  }, trailingText: lastPayment);
+                },
+              ),
+              const Divider(),
+              _buildMenuTile(Icons.logout, "Logout", () => _showLogoutDialog(context), textColor: Colors.red),
             ],
           );
         },

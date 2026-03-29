@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../cart/cart/presentation/cubit/cart_cubit.dart';
+import '../../../cart/presentation/cubit/profile_picture_cubit.dart';
 import '../../../dashboard/presentation/cubit/navigation_cubit.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -15,10 +17,20 @@ class HomeHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const CircleAvatar(
-            radius: 22,
-            backgroundColor: Colors.orange,
-            child: Icon(Icons.person, color: Colors.white, size: 20),
+          // 🟢 Modified Profile Image for Dashboard
+          BlocBuilder<ProfilePictureCubit, ProfilePictureState>(
+            builder: (context, state) {
+              return CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.orange,
+                backgroundImage: state.imagePath != null
+                    ? FileImage(File(state.imagePath!))
+                    : null,
+                child: state.imagePath == null
+                    ? const Icon(Icons.person, color: Colors.white, size: 20)
+                    : null,
+              );
+            },
           ),
           const SizedBox(width: 10),
 
