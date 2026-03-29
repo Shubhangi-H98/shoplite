@@ -72,4 +72,13 @@ class ProductRepositoryImpl implements ProductRepository {
       throw Exception("Search service unavailable and no cache found.");
     }
   }
+
+  @override
+  Future<List<Product>> getProductsByCategory(String category, {int limit = 20, int skip = 0}) async {
+    final response = await apiClient.get('/products/category/$category', queryParameters: {
+      'limit': limit,
+      'skip': skip,
+    });
+    return (response.data['products'] as List).map((e) => ProductModel.fromJson(e)).toList();
+  }
 }
