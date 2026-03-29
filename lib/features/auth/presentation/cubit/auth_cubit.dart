@@ -25,6 +25,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       if (email == "test@test.com" && password == "123456") {
         debugPrint("🟢 [AuthCubit] Auth Success. Storing token...");
+
         await _storage.write(key: 'auth_token', value: 'mock_jwt_token_123');
         debugPrint("✅ [AuthCubit] Token saved. Moving to Authenticated state.");
         emit(AuthAuthenticated());
@@ -33,7 +34,7 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthError("Invalid email or password. Hint: test@test.com / 123456"));
       }
     } catch (e, stack) {
-      debugPrint("❌ [AuthCubit] Login Crash: $e \nStackTrace: $stack");
+      debugPrint("❌ [AuthCubit] Login Crash: $e");
       emit(AuthError("Unexpected error occurred."));
     }
   }
@@ -56,9 +57,16 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> logout() async {
-    debugPrint("🏃 [AuthCubit] User Logging out...");
-    await _storage.delete(key: 'auth_token');
-    debugPrint("🗑️ [AuthCubit] Session cleared.");
-    emit(AuthUnauthenticated());
+    try {
+      debugPrint("🚪 [AuthCubit] Initiation Logout Sequence...");
+
+      await _storage.delete(key: 'auth_token');
+      debugPrint("🗑️ [AuthCubit] Persistent token cleared from secure storage.");
+
+      emit(AuthUnauthenticated());
+      debugPrint("✅ [AuthCubit] State changed to Unauthenticated.");
+    } catch (e) {
+      debugPrint("❌ [AuthCubit] Logout failed: $e");
+    }
   }
 }

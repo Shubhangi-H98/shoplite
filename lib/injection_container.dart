@@ -17,6 +17,7 @@ Future<void> init() async {
   sl.registerFactory(() => CartCubit());
   sl.registerFactory(() => FavoritesCubit());
 
+
   sl.registerLazySingleton<ProductRepository>(
         () => ProductRepositoryImpl(sl()),
   );
