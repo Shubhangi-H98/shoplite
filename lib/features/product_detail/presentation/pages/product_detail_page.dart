@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../catalog/domain/entities/product.dart';
@@ -44,9 +45,11 @@ class ProductDetailPage extends StatelessWidget {
             flexibleSpace: FlexibleSpaceBar(
               background: Hero(
                 tag: 'product-${product.id}',
-                child: Image.network(
-                  product.thumbnail,
+                child: CachedNetworkImage(
+                  imageUrl: product.thumbnail,
                   fit: BoxFit.cover,
+                  placeholder: (context, url) => const Center(child: CircularProgressIndicator(color: Colors.orange)),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
             ),

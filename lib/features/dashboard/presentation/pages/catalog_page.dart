@@ -1,13 +1,18 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../cart/cart/presentation/cubit/cart_cubit.dart';
+import '../../../cart/presentation/cubit/favorites_cubit.dart';
+import '../../../catalog/data/models/product_model.dart';
 import '../../../catalog/domain/entities/product.dart';
 import '../../../catalog/presentation/cubit/catalog_cubit.dart';
 import '../../../catalog/presentation/cubit/catalog_state.dart';
 import '../../../product_detail/presentation/pages/product_detail_page.dart';
 import '../../../splash/presentation/widgets/home_header.dart';
+
 
 class CatalogPage extends StatefulWidget {
   const CatalogPage({super.key});
@@ -158,12 +163,44 @@ class _CatalogPageState extends State<CatalogPage> {
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     child: Hero(
                       tag: 'product-${product.id}',
-                      child: Image.network(product.thumbnail, fit: BoxFit.cover, width: double.infinity),
+                      child: CachedNetworkImage(
+                        imageUrl: product.thumbnail,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange)),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.broken_image, color: Colors.grey),
+                        ),
+                      ),
                     ),
                   ),
-                  const Positioned(
+                  // ❤️ Favorites Persistence Logic
+                  Positioned(
                     top: 10, right: 10,
-                    child: CircleAvatar(radius: 15, backgroundColor: Colors.white70, child: Icon(Icons.favorite_border, size: 18, color: Colors.orange)),
+                    child: BlocBuilder<FavoritesCubit, List<ProductModel>>(
+                      builder: (context, favList) {
+                        final isFavorite = context.read<FavoritesCubit>().isFavorite(product.id);
+                        return GestureDetector(
+                          onTap: () {
+                            debugPrint("❤️ [CatalogPage] Toggling favorite for ${product.title}");
+                            context.read<FavoritesCubit>().toggleFavorite(product as ProductModel);
+                          },
+                          child: CircleAvatar(
+                            radius: 15,
+                            backgroundColor: Colors.white.withOpacity(0.8),
+                            child: Icon(
+                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                              size: 18,
+                              color: isFavorite ? Colors.red : Colors.orange,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -181,7 +218,18 @@ class _CatalogPageState extends State<CatalogPage> {
                       Text(formattedPrice, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 16)),
                       IconButton(
                         icon: const Icon(Icons.add_circle, color: Colors.black, size: 24),
-                        onPressed: () => debugPrint("🛒 [CatalogPage] Quick-add: ${product.title}"),
+                        onPressed: () {
+                          debugPrint("🛒 [CatalogPage] Adding ${product.title} to cart.");
+                          context.read<CartCubit>().addToCart(product as ProductModel);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("${product.title} added to cart"),
+                              duration: const Duration(seconds: 1),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
