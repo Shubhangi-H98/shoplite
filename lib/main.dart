@@ -11,6 +11,7 @@ import 'features/cart/presentation/cubit/favorites_cubit.dart';
 import 'features/cart/presentation/pages/order_success_page.dart';
 import 'features/catalog/data/models/product_model.dart';
 import 'features/catalog/presentation/cubit/catalog_cubit.dart';
+import 'features/dashboard/presentation/cubit/navigation_cubit.dart';
 import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
 import 'injection_container.dart' as di;
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => di.sl<AuthCubit>()..checkAuthStatus()),
         BlocProvider(create: (context) => di.sl<CartCubit>()),
         BlocProvider(create: (context) => di.sl<FavoritesCubit>()),
+        BlocProvider(create: (context) => NavigationCubit()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

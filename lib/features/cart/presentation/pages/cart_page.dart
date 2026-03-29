@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../dashboard/presentation/cubit/navigation_cubit.dart';
 import '../../cart/presentation/cubit/cart_cubit.dart';
 import '../../data/models/cart_item_model.dart';
 
@@ -22,8 +23,35 @@ class CartPage extends StatelessWidget {
       body: BlocBuilder<CartCubit, List<CartItem>>(
         builder: (context, state) {
           if (state.isEmpty) {
-            return const Center(
-              child: Text("Your cart is empty!", style: TextStyle(fontSize: 18, color: Colors.grey)),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.shopping_cart_outlined, size: 50, color: Colors.grey),
+                  const SizedBox(height: 10),
+                  const Text(
+                      "Your cart is empty!",
+                      style: TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w500)
+                  ),
+                  const SizedBox(height: 24),
+
+                  // 🛒 Start Shopping Button
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      debugPrint("🛒 [CartPage] Empty state: Navigating back to Home.");
+                      context.read<NavigationCubit>().changeTab(0);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text("Go To Shopping", style: TextStyle(fontSize: 15)),
+                  ),
+                ],
+              ),
             );
           }
 
