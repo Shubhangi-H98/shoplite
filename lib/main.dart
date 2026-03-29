@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/cart/presentation/pages/order_success_page.dart';
 import 'features/catalog/presentation/cubit/catalog_cubit.dart';
@@ -9,9 +10,19 @@ import 'features/splash/presentation/pages/splash_page.dart';
 import 'injection_container.dart' as di;
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await di.init();
-  runApp(const MyApp());
+  try {
+    debugPrint("🚀 [Main] Application Bootstrap Sequence Started.");
+    WidgetsFlutterBinding.ensureInitialized();
+
+    debugPrint("🛠️ [Main] Initializing Dependency Injection Service...");
+    await di.init();
+    debugPrint("✅ [Main] Dependency Injection Initialized.");
+
+    runApp(const MyApp());
+  } catch (e, stack) {
+    debugPrint("💥 [Main] FATAL ERROR during startup: $e");
+    debugPrint("📄 [Main] StackTrace: $stack");
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -19,38 +30,33 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("🎨 [MyApp] Building Widget Tree with BlocProviders.");
+
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (_) => di.sl<CatalogCubit>()..fetchProducts(),
-        ),
+        BlocProvider(create: (_) => di.sl<CatalogCubit>()..fetchProducts()),
+        BlocProvider(create: (_) => di.sl<AuthCubit>()..checkAuthStatus()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'ShopLite',
-
-        // 3. Professional Orange Theme
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.orange,
-            primary: Colors.orange,
-          ),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange, primary: Colors.orange),
           scaffoldBackgroundColor: Colors.white,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            iconTheme: IconThemeData(color: Colors.black),
-          ),
+          appBarTheme: const AppBarTheme(backgroundColor: Colors.white, elevation: 0),
         ),
-
-        // 4. Routing Logic
         initialRoute: '/',
         routes: {
           '/': (context) => const SplashPage(),
           '/login': (context) => const LoginPage(),
           '/dashboard': (context) => const DashboardPage(),
           '/order-success': (context) => const OrderSuccessPage(),
+        },
+        // Navigation tracking
+        onGenerateRoute: (settings) {
+          debugPrint("🛣️ [Navigator] Route requested: ${settings.name}");
+          return null;
         },
       ),
     );

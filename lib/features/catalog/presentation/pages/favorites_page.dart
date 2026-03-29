@@ -5,6 +5,8 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("❤️ [FavoritesPage] Building favorites list UI.");
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -20,21 +22,20 @@ class FavoritesPage extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             child: ListTile(
+              onTap: () => debugPrint("🎯 [FavoritesPage] Tapped favorite item at index: $index"),
               contentPadding: const EdgeInsets.all(8),
               leading: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                width: 60, height: 60,
+                decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.image, color: Colors.grey),
               ),
-              title: const Text("Favorite Product Title", style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text("Favorite Product $index", style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: const Text("₹1,299", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
               trailing: IconButton(
                 icon: const Icon(Icons.favorite, color: Colors.red),
-                onPressed: () {}, // Remove from favorites logic
+                onPressed: () {
+                  debugPrint("🗑️ [FavoritesPage] Request to remove item $index from favorites.");
+                },
               ),
             ),
           );

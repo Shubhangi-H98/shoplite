@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -24,17 +23,18 @@ class _CatalogPageState extends State<CatalogPage> {
   @override
   void initState() {
     super.initState();
-    // 2. Scroll listener add karein
+    debugPrint("📦 [CatalogPage] Screen Initialized. Fetching initial products...");
+
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        print("Reach at the end! Fetching more...");
-        // context.read<CatalogCubit>().fetchMoreProducts(); // Future Step
+        debugPrint("📜 [CatalogPage] Reach at the end of list! Ready for Pagination.");
       }
     });
   }
 
   @override
   void dispose() {
+    debugPrint("🗑️ [CatalogPage] Disposing controllers and timers.");
     _debounce?.cancel();
     _scrollController.dispose();
     super.dispose();
@@ -42,7 +42,6 @@ class _CatalogPageState extends State<CatalogPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Check screen width for responsiveness
     final double screenWidth = MediaQuery.of(context).size.width;
     final int crossAxisCount = screenWidth > 600 ? 4 : 2;
 
@@ -51,23 +50,20 @@ class _CatalogPageState extends State<CatalogPage> {
       body: SafeArea(
         child: BlocBuilder<CatalogCubit, CatalogState>(
           builder: (context, state) {
+            debugPrint("🎨 [CatalogPage] Rebuilding UI with State: ${state.runtimeType}");
+
             return CustomScrollView(
               controller: _scrollController,
               physics: const BouncingScrollPhysics(),
               slivers: [
-                // 1. Header Section
                 const SliverPadding(
                   padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                   sliver: SliverToBoxAdapter(child: HomeHeader()),
                 ),
-
-                // 2. Search Bar Section
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   sliver: SliverToBoxAdapter(child: _buildSearchBar()),
                 ),
-
-                // 3. Categories Label & List
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   sliver: SliverToBoxAdapter(
@@ -81,22 +77,15 @@ class _CatalogPageState extends State<CatalogPage> {
                     ),
                   ),
                 ),
-
-                // 4. Promo Banner
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   sliver: SliverToBoxAdapter(child: _buildPromoBanner()),
                 ),
-
-                // 5. Popular Product Title
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  sliver: SliverToBoxAdapter(
-                    child: _buildSectionHeader("Popular Product"),
-                  ),
+                  sliver: SliverToBoxAdapter(child: _buildSectionHeader("Popular Product")),
                 ),
 
-                // 6. Responsive Product Grid (Existing Logic)
                 if (state is CatalogLoading)
                   const SliverFillRemaining(
                     child: Center(child: CircularProgressIndicator(color: Colors.orange)),
@@ -130,7 +119,6 @@ class _CatalogPageState extends State<CatalogPage> {
                         ),
                       ),
                     ),
-
                 const SliverToBoxAdapter(child: SizedBox(height: 30)),
               ],
             );
@@ -140,41 +128,29 @@ class _CatalogPageState extends State<CatalogPage> {
     );
   }
 
-  // --- UI Helper Methods ---
   Widget _buildProductCard(BuildContext context, Product product) {
-
     final double indianPrice = product.price * 83;
     final String formattedPrice = NumberFormat.currency(
-      locale: 'en_IN',
-      symbol: '₹',
-      decimalDigits: 0,
+      locale: 'en_IN', symbol: '₹', decimalDigits: 0,
     ).format(indianPrice);
 
     return GestureDetector(
       onTap: () {
+        debugPrint("🎯 [CatalogPage] Navigating to Detail: ${product.title} (ID: ${product.id})");
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailPage(product: product),
-          ),
+          MaterialPageRoute(builder: (context) => ProductDetailPage(product: product)),
         );
       },
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            )
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Section
             Expanded(
               child: Stack(
                 children: [
@@ -182,50 +158,31 @@ class _CatalogPageState extends State<CatalogPage> {
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                     child: Hero(
                       tag: 'product-${product.id}',
-                      child: Image.network(
-                        product.thumbnail,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
+                      child: Image.network(product.thumbnail, fit: BoxFit.cover, width: double.infinity),
                     ),
                   ),
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: CircleAvatar(
-                      radius: 15,
-                      backgroundColor: Colors.white.withOpacity(0.8),
-                      child: const Icon(Icons.favorite_border, size: 18, color: Colors.orange),
-                    ),
+                  const Positioned(
+                    top: 10, right: 10,
+                    child: CircleAvatar(radius: 15, backgroundColor: Colors.white70, child: Icon(Icons.favorite_border, size: 18, color: Colors.orange)),
                   ),
                 ],
               ),
             ),
-            // Details Section
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
+                  Text(product.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        formattedPrice,
-                        style: const TextStyle(
-                          color: Colors.orange,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                      Text(formattedPrice, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 16)),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle, color: Colors.black, size: 24),
+                        onPressed: () => debugPrint("🛒 [CatalogPage] Quick-add: ${product.title}"),
                       ),
-                      const Icon(Icons.add_circle, color: Colors.black, size: 24),
                     ],
                   ),
                 ],
@@ -239,14 +196,13 @@ class _CatalogPageState extends State<CatalogPage> {
 
   Widget _buildSearchBar() {
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(15),
-      ),
+      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(15)),
       child: TextField(
         onChanged: (value) {
+          debugPrint("⌨️ [CatalogPage] Input detected: '$value'");
           if (_debounce?.isActive ?? false) _debounce!.cancel();
           _debounce = Timer(const Duration(milliseconds: 500), () {
+            debugPrint("🔍 [CatalogPage] Executing Debounced Search for: '$value'");
             context.read<CatalogCubit>().searchProducts(value);
           });
         },
@@ -265,60 +221,27 @@ class _CatalogPageState extends State<CatalogPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        TextButton(
-          onPressed: () {},
-          child: const Text('See All', style: TextStyle(color: Colors.orange)),
-        ),
+        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        TextButton(onPressed: () {}, child: const Text('See All', style: TextStyle(color: Colors.orange))),
       ],
     );
   }
 
   Widget _buildPromoBanner() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      width: double.infinity, padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Colors.orange, Colors.deepOrangeAccent],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: const LinearGradient(colors: [Colors.orange, Colors.deepOrangeAccent]),
         borderRadius: BorderRadius.circular(25),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Special Sale\nUp to 40% OFF',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  'Limited time offer',
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Colors.white24,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.bolt, size: 40, color: Colors.white),
-          ),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('Special Sale\nUp to 40% OFF', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+            SizedBox(height: 12),
+            Text('Limited time offer', style: TextStyle(color: Colors.white70)),
+          ])),
+          Icon(Icons.bolt, size: 40, color: Colors.white),
         ],
       ),
     );
@@ -326,33 +249,16 @@ class _CatalogPageState extends State<CatalogPage> {
 
   Widget _buildCategoryList() {
     final categories = ['All', 'Men', 'Women', 'Electronic', 'Jewelry'];
-    return SizedBox(
-      height: 45,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final isSelected = index == 0;
-          return Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: FilterChip(
-              label: Text(categories[index]),
-              selected: isSelected,
-              onSelected: (val) {},
-              selectedColor: Colors.orange,
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-              backgroundColor: Colors.grey[100],
-              checkmarkColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+    return SizedBox(height: 45, child: ListView.builder(
+      scrollDirection: Axis.horizontal, itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final isSelected = index == 0;
+        return Padding(padding: const EdgeInsets.only(right: 10), child: FilterChip(
+          label: Text(categories[index]), selected: isSelected, onSelected: (val) {},
+          selectedColor: Colors.orange, labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
+          backgroundColor: Colors.grey[100], shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ));
+      },
+    ));
   }
 }

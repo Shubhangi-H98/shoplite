@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../cart/presentation/pages/cart_page.dart';
 import '../../../catalog/presentation/pages/favorites_page.dart';
 import 'catalog_page.dart';
@@ -14,17 +13,17 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
 
-  // List of pages to display in the dashboard
   final List<Widget> _pages = [
     const CatalogPage(),
     const CartPage(),
     const FavoritesPage(),
-    const Center(child: Text('Categories - Coming Soon')),
-    const Center(child: Text('Cart - Empty')),
-    const Center(child: Text('Profile - Login Required')),
+    const Center(child: Text('Profile - Work in Progress')),
   ];
 
   void _onItemTapped(int index) {
+    final List<String> tabNames = ['Home', 'Cart', 'Favorites', 'Profile'];
+    debugPrint("📍 [Dashboard] Tab Switch: From ${tabNames[_selectedIndex]} to ${tabNames[index]}");
+
     setState(() {
       _selectedIndex = index;
     });
@@ -40,7 +39,7 @@ class _DashboardPageState extends State<DashboardPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: Colors.orange, // Professional Orange theme
+        selectedItemColor: Colors.orange,
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,

@@ -5,6 +5,8 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("🏠 [HomeHeader] Building header widget.");
+
     return Row(
       children: [
         const CircleAvatar(
@@ -21,11 +23,15 @@ class HomeHeader extends StatelessWidget {
         ),
         const Spacer(),
         IconButton.filledTonal(
-          onPressed: () {},
+          onPressed: () {
+            debugPrint("🔔 [HomeHeader] Notifications icon pressed.");
+          },
           icon: const Icon(Icons.notifications_none),
         ),
         IconButton.filledTonal(
-          onPressed: () {},
+          onPressed: () {
+            debugPrint("🛒 [HomeHeader] Cart/Shopping bag icon pressed from header.");
+          },
           icon: const Icon(Icons.shopping_bag_outlined),
         ),
       ],

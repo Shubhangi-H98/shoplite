@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/product.dart';
 
 class ProductModel extends Product {
@@ -10,15 +11,20 @@ class ProductModel extends Product {
     required super.rating,
   });
 
-  /// Converts JSON response from API to ProductModel.
   factory ProductModel.fromJson(Map<String, dynamic> json) {
-    return ProductModel(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'] ?? '',
-      price: (json['price'] as num).toDouble(),
-      thumbnail: json['thumbnail'],
-      rating: (json['rating'] as num).toDouble(),
-    );
+    try {
+      return ProductModel(
+        id: json['id'],
+        title: json['title'],
+        description: json['description'] ?? '',
+        price: (json['price'] as num).toDouble(),
+        thumbnail: json['thumbnail'],
+        rating: (json['rating'] as num).toDouble(),
+      );
+    } catch (e, stack) {
+      debugPrint("💥 [ProductModel] Error parsing product JSON (ID: ${json['id']}): $e");
+      debugPrint("📄 [ProductModel] StackTrace: $stack");
+      rethrow;
+    }
   }
 }
