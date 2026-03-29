@@ -8,6 +8,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/cart/cart/presentation/cubit/cart_cubit.dart';
 import 'features/cart/data/models/cart_item_model.dart';
 import 'features/cart/presentation/cubit/favorites_cubit.dart';
+import 'features/cart/presentation/cubit/order_cubit.dart';
 import 'features/cart/presentation/pages/order_success_page.dart';
 import 'features/catalog/data/models/product_model.dart';
 import 'features/catalog/presentation/cubit/catalog_cubit.dart';
@@ -57,6 +58,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => di.sl<CartCubit>()),
         BlocProvider(create: (context) => di.sl<FavoritesCubit>()),
         BlocProvider(create: (context) => NavigationCubit()),
+        BlocProvider(create: (context) => OrderCubit()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

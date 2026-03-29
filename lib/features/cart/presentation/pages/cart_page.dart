@@ -5,13 +5,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../dashboard/presentation/cubit/navigation_cubit.dart';
 import '../../cart/presentation/cubit/cart_cubit.dart';
 import '../../data/models/cart_item_model.dart';
+import 'checkout_page.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("🛒 [CartPage] Building Cart UI with Offline Image Support.");
+    debugPrint("🛒 [CartPage] Building Cart UI with Order Breakdown.");
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -35,12 +36,8 @@ class CartPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // 🛒 Start Shopping Button
                   ElevatedButton.icon(
-                    onPressed: () {
-                      debugPrint("🛒 [CartPage] Empty state: Navigating back to Home.");
-                      context.read<NavigationCubit>().changeTab(0);
-                    },
+                    onPressed: () => context.read<NavigationCubit>().changeTab(0),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       foregroundColor: Colors.white,
@@ -64,6 +61,7 @@ class CartPage extends StatelessWidget {
                   itemBuilder: (context, index) => _buildCartItem(context, state[index]),
                 ),
               ),
+              // 🟢 Order Summary with Delivery Charges logic
               _buildOrderSummary(context),
             ],
           );
@@ -72,6 +70,7 @@ class CartPage extends StatelessWidget {
     );
   }
 
+  // ... _buildCartItem and _buildQtyBtn functions stay same as provided ...
   Widget _buildCartItem(BuildContext context, CartItem item) {
     final double indianPrice = item.product.price * 83;
     final String formattedPrice = NumberFormat.currency(
@@ -84,7 +83,6 @@ class CartPage extends StatelessWidget {
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
       child: Row(
         children: [
-          // Senior Logic: Using CachedNetworkImage for Offline Support
           Container(
             height: 80, width: 80,
             decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(15)),
@@ -122,10 +120,7 @@ class CartPage extends StatelessWidget {
                     const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: () {
-                        debugPrint("🗑️ [CartPage] Removing ${item.product.title} from cart.");
-                        context.read<CartCubit>().removeFromCart(item.product.id);
-                      },
+                      onPressed: () => context.read<CartCubit>().removeFromCart(item.product.id),
                     )
                   ],
                 )
@@ -150,10 +145,13 @@ class CartPage extends StatelessWidget {
 
   Widget _buildOrderSummary(BuildContext context) {
     final cartCubit = context.read<CartCubit>();
-    final double total = cartCubit.totalPrice * 83;
-    final String formattedTotal = NumberFormat.currency(
-      locale: 'en_IN', symbol: '₹', decimalDigits: 0,
-    ).format(total);
+    final double subtotal = cartCubit.totalPrice * 83;
+    final double deliveryCharge = subtotal > 500 ? 0 : 40; // ₹40 delivery if order below ₹500
+    final double total = subtotal + deliveryCharge;
+
+    final String formattedSubtotal = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(subtotal);
+    final String formattedDelivery = deliveryCharge == 0 ? "FREE" : "₹$deliveryCharge";
+    final String formattedTotal = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(total);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -164,21 +162,43 @@ class CartPage extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // 🟢 Add More Items Button
+          TextButton.icon(
+            onPressed: () => context.read<NavigationCubit>().changeTab(0),
+            icon: const Icon(Icons.add, color: Colors.blue),
+            label: const Text("Add More Items", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
+          ),
+          const Divider(),
+          const SizedBox(height: 8),
+
+          // Subtotal Row
+          _buildSummaryRow("Subtotal", formattedSubtotal),
+          const SizedBox(height: 8),
+
+          // Delivery Charges Row
+          _buildSummaryRow("Delivery Charges", formattedDelivery,
+              valueColor: deliveryCharge == 0 ? Colors.green : Colors.black),
+          const SizedBox(height: 12),
+
+          const Divider(),
+          const SizedBox(height: 12),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Total Amount", style: TextStyle(fontSize: 16, color: Colors.grey)),
-              Text(formattedTotal, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.orange)),
+              const Text("Total Amount", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(formattedTotal, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange)),
             ],
           ),
           const SizedBox(height: 24),
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                debugPrint("🧾 [Cart] Order Success. Clearing Hive items.");
-                cartCubit.clearCart();
-                Navigator.pushNamed(context, '/order-success');
+                if (context.read<CartCubit>().state.isNotEmpty) {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const CheckoutPage()));
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
@@ -191,6 +211,16 @@ class CartPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value, {Color valueColor = Colors.black}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+        Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: valueColor)),
+      ],
     );
   }
 }

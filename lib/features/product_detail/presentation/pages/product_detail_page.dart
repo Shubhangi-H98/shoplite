@@ -1,7 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../catalog/domain/entities/product.dart';
+import '../../../cart/cart/presentation/cubit/cart_cubit.dart';
+import '../../../cart/presentation/cubit/favorites_cubit.dart';
+import '../../../dashboard/presentation/cubit/navigation_cubit.dart';
+import '../../../catalog/data/models/product_model.dart';
 
 class ProductDetailPage extends StatelessWidget {
   final Product product;
@@ -35,10 +40,18 @@ class ProductDetailPage extends StatelessWidget {
               },
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.favorite_border, color: Colors.orange),
-                onPressed: () {
-                  debugPrint("❤️ [ProductDetail] Favorite toggled for Product ID: ${product.id}");
+              BlocBuilder<FavoritesCubit, List<ProductModel>>(
+                builder: (context, favList) {
+                  final isFav = context.read<FavoritesCubit>().isFavorite(product.id);
+                  return IconButton(
+                    icon: Icon(
+                      isFav ? Icons.favorite : Icons.favorite_border,
+                      color: isFav ? Colors.red : Colors.orange,
+                    ),
+                    onPressed: () {
+                      context.read<FavoritesCubit>().toggleFavorite(product as ProductModel);
+                    },
+                  );
                 },
               ),
             ],
@@ -107,17 +120,24 @@ class ProductDetailPage extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(15)),
-              child: const Icon(Icons.shopping_bag_outlined, color: Colors.orange),
+            InkWell(
+              onTap: () {
+                Navigator.pop(context);
+                context.read<NavigationCubit>().changeTab(1);
+              },
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(15)),
+                child: const Icon(Icons.shopping_bag_outlined, color: Colors.orange),
+              ),
             ),
             const SizedBox(width: 20),
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
                   debugPrint("🛒 [ProductDetail] 'Add to Cart' clicked for ID: ${product.id}");
-                  // Logic for CartCubit will be added here
+                  context.read<CartCubit>().addToCart(product as ProductModel);
+                  _showAddToCartPopup(context, product as ProductModel);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
@@ -131,6 +151,60 @@ class ProductDetailPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // 🛠️ Reusable Bottom Sheet Popup
+  void _showAddToCartPopup(BuildContext context, ProductModel product) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 50),
+              const SizedBox(height: 16),
+              Text("${product.title} added to cart!",
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: const BorderSide(color: Colors.orange),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("Add More", style: TextStyle(color: Colors.orange)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        context.read<NavigationCubit>().changeTab(1);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("View Cart", style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
