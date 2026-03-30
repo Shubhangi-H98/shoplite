@@ -157,12 +157,8 @@ class CartPage extends StatelessWidget {
   Widget _buildOrderSummary(BuildContext context, bool isDark) {
     final cartCubit = context.read<CartCubit>();
     final double subtotal = cartCubit.totalPrice * 83;
-    final double deliveryCharge = subtotal > 500 ? 0 : 40;
-    final double total = subtotal + deliveryCharge;
 
     final String formattedSubtotal = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(subtotal);
-    final String formattedDelivery = deliveryCharge == 0 ? "FREE" : "₹$deliveryCharge";
-    final String formattedTotal = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(total);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -172,33 +168,11 @@ class CartPage extends StatelessWidget {
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          TextButton.icon(
-            onPressed: () => context.read<NavigationCubit>().changeTab(0),
-            icon: const Icon(Icons.add, color: Colors.blue),
-            label: const Text("Add More Items", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
-          ),
-          const Divider(),
-          const SizedBox(height: 8),
-
           _buildSummaryRow("Subtotal", formattedSubtotal, isDark),
-          const SizedBox(height: 8),
 
-          _buildSummaryRow("Delivery Charges", formattedDelivery, isDark,
-              valueColor: deliveryCharge == 0 ? Colors.green : null),
-          const SizedBox(height: 12),
-
-          const Divider(),
-          const SizedBox(height: 12),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Total Amount", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Text(formattedTotal, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange)),
-            ],
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
 
           SizedBox(
             width: double.infinity,
@@ -214,7 +188,7 @@ class CartPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
-              child: const Text("Place Order", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              child: const Text("Proceed to Checkout", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ),
           ),
         ],

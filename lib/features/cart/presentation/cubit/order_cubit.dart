@@ -21,12 +21,17 @@ class OrderModel {
 }
 
 class OrderCubit extends Cubit<List<OrderModel>> {
+  final Box _box = Hive.box('orders_box');
+
   OrderCubit() : super([]) {
     _loadOrdersFromHive();
   }
 
   void _loadOrdersFromHive() {
-    final box = Hive.box('orders_box');
+    final List<dynamic> rawOrders = _box.values.toList();
+    if (rawOrders.isNotEmpty) {
+      emit(rawOrders.cast<OrderModel>().reversed.toList());
+    }
   }
 
   void placeOrder(List<CartItem> cartItems, double total, String address, String payment) {
@@ -39,8 +44,9 @@ class OrderCubit extends Cubit<List<OrderModel>> {
       paymentMethod: payment,
     );
 
+    _box.add(newOrder);
+
     final updatedOrders = [newOrder, ...state];
     emit(updatedOrders);
-
   }
 }

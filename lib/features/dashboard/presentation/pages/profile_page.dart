@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/theme/theme_cubit.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
+import '../../../auth/presentation/pages/orders_page.dart';
 import '../../../cart/presentation/cubit/favorites_cubit.dart';
 import '../../../cart/presentation/cubit/order_cubit.dart';
 import '../../../cart/presentation/cubit/profile_picture_cubit.dart';
@@ -87,9 +88,21 @@ class _ProfilePageState extends State<ProfilePage> {
               Text(email, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 30),
 
-              _buildMenuTile(Icons.shopping_bag_outlined, "My Orders", () {
-                context.read<NavigationCubit>().changeTab(1);
-              }),
+              BlocBuilder<OrderCubit, List<OrderModel>>(
+                builder: (context, orders) {
+                  return _buildMenuTile(
+                    Icons.shopping_bag_outlined,
+                    "My Orders",
+                        () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const OrdersPage())
+                      );
+                    },
+                    trailingText: orders.isNotEmpty ? "${orders.length} Orders" : null,
+                  );
+                },
+              ),
               BlocBuilder<FavoritesCubit, List>(
                 builder: (context, favs) => _buildMenuTile(
                   Icons.favorite_border, "Wishlist",
