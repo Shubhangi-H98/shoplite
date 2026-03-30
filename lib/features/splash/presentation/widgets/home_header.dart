@@ -12,12 +12,14 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine if the current theme is dark
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // 🟢 Modified Profile Image for Dashboard
           BlocBuilder<ProfilePictureCubit, ProfilePictureState>(
             builder: (context, state) {
               return CircleAvatar(
@@ -49,7 +51,10 @@ class HomeHeader extends StatelessWidget {
                   children: [
                     Text(
                       'Hello $displayName',
-                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                      style: TextStyle(
+                          color: isDark ? Colors.grey[400] : Colors.grey,
+                          fontSize: 13
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -63,23 +68,24 @@ class HomeHeader extends StatelessWidget {
             ),
           ),
 
-          // Action Icons (Notification & Cart)
-          _buildActionIcon(Icons.notifications_none, () {}),
+          // Action Icons
+          _buildActionIcon(Icons.notifications_none, isDark, () {}),
           const SizedBox(width: 4),
-          _buildCartIcon(),
+          _buildCartIcon(isDark),
         ],
       ),
     );
   }
 
-  Widget _buildActionIcon(IconData icon, VoidCallback onTap) {
+  Widget _buildActionIcon(IconData icon, bool isDark, VoidCallback onTap) {
     return IconButton(
       onPressed: onTap,
-      icon: Icon(icon, size: 24, color: Colors.black87),
+      // Removed hardcoded Colors.black87 to allow theme support
+      icon: Icon(icon, size: 24),
     );
   }
 
-  Widget _buildCartIcon() {
+  Widget _buildCartIcon(bool isDark) {
     return BlocBuilder<CartCubit, List>(
       builder: (context, cartItems) {
         int count = cartItems.length;
@@ -91,7 +97,8 @@ class HomeHeader extends StatelessWidget {
                 debugPrint("🛒 [HomeHeader] Navigating to Cart Tab via Cubit.");
                 context.read<NavigationCubit>().changeTab(1);
               },
-              icon: const Icon(Icons.shopping_bag_outlined, size: 24, color: Colors.black87),
+              // Removed hardcoded Colors.black87 to allow theme support
+              icon: const Icon(Icons.shopping_bag_outlined, size: 24),
             ),
             if (count > 0)
               Positioned(

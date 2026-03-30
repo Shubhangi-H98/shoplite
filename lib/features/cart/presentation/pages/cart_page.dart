@@ -13,12 +13,15 @@ class CartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     debugPrint("🛒 [CartPage] Building Cart UI with Order Breakdown.");
+
+    // Theme check
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      // Removed hardcoded white background to support theme
       appBar: AppBar(
-        title: const Text("My Cart", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text("My Cart", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
-        backgroundColor: Colors.white,
         elevation: 0,
       ),
       body: BlocBuilder<CartCubit, List<CartItem>>(
@@ -58,11 +61,10 @@ class CartPage extends StatelessWidget {
                 child: ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: state.length,
-                  itemBuilder: (context, index) => _buildCartItem(context, state[index]),
+                  itemBuilder: (context, index) => _buildCartItem(context, state[index], isDark),
                 ),
               ),
-              // 🟢 Order Summary with Delivery Charges logic
-              _buildOrderSummary(context),
+              _buildOrderSummary(context, isDark),
             ],
           );
         },
@@ -70,8 +72,7 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  // ... _buildCartItem and _buildQtyBtn functions stay same as provided ...
-  Widget _buildCartItem(BuildContext context, CartItem item) {
+  Widget _buildCartItem(BuildContext context, CartItem item, bool isDark) {
     final double indianPrice = item.product.price * 83;
     final String formattedPrice = NumberFormat.currency(
       locale: 'en_IN', symbol: '₹', decimalDigits: 0,
@@ -80,12 +81,19 @@ class CartPage extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+      // Dynamic background color for items
+      decoration: BoxDecoration(
+          color: isDark ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(20)
+      ),
       child: Row(
         children: [
           Container(
             height: 80, width: 80,
-            decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(15)),
+            decoration: BoxDecoration(
+                color: isDark ? Colors.grey[800] : Colors.grey[100],
+                borderRadius: BorderRadius.circular(15)
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15),
               child: CachedNetworkImage(
@@ -107,14 +115,14 @@ class CartPage extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildQtyBtn(Icons.remove, () {
+                    _buildQtyBtn(Icons.remove, isDark, () {
                       context.read<CartCubit>().removeFromCart(item.product.id);
                     }),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text("${item.quantity}", style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
-                    _buildQtyBtn(Icons.add, () {
+                    _buildQtyBtn(Icons.add, isDark, () {
                       context.read<CartCubit>().addToCart(item.product);
                     }),
                     const Spacer(),
@@ -132,21 +140,24 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _buildQtyBtn(IconData icon, VoidCallback onTap) {
+  Widget _buildQtyBtn(IconData icon, bool isDark, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(border: Border.all(color: Colors.grey[300]!), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(
+            border: Border.all(color: isDark ? Colors.grey[700]! : Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(8)
+        ),
         child: Icon(icon, size: 16),
       ),
     );
   }
 
-  Widget _buildOrderSummary(BuildContext context) {
+  Widget _buildOrderSummary(BuildContext context, bool isDark) {
     final cartCubit = context.read<CartCubit>();
     final double subtotal = cartCubit.totalPrice * 83;
-    final double deliveryCharge = subtotal > 500 ? 0 : 40; // ₹40 delivery if order below ₹500
+    final double deliveryCharge = subtotal > 500 ? 0 : 40;
     final double total = subtotal + deliveryCharge;
 
     final String formattedSubtotal = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(subtotal);
@@ -155,14 +166,13 @@ class CartPage extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
       child: Column(
         children: [
-          // 🟢 Add More Items Button
           TextButton.icon(
             onPressed: () => context.read<NavigationCubit>().changeTab(0),
             icon: const Icon(Icons.add, color: Colors.blue),
@@ -171,13 +181,11 @@ class CartPage extends StatelessWidget {
           const Divider(),
           const SizedBox(height: 8),
 
-          // Subtotal Row
-          _buildSummaryRow("Subtotal", formattedSubtotal),
+          _buildSummaryRow("Subtotal", formattedSubtotal, isDark),
           const SizedBox(height: 8),
 
-          // Delivery Charges Row
-          _buildSummaryRow("Delivery Charges", formattedDelivery,
-              valueColor: deliveryCharge == 0 ? Colors.green : Colors.black),
+          _buildSummaryRow("Delivery Charges", formattedDelivery, isDark,
+              valueColor: deliveryCharge == 0 ? Colors.green : null),
           const SizedBox(height: 12),
 
           const Divider(),
@@ -214,12 +222,19 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {Color valueColor = Colors.black}) {
+  Widget _buildSummaryRow(String label, String value, bool isDark, {Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
-        Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: valueColor)),
+        Text(
+            value,
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: valueColor ?? (isDark ? Colors.white : Colors.black)
+            )
+        ),
       ],
     );
   }

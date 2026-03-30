@@ -9,14 +9,15 @@ class OrdersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Theme check
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text("My Order History", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        // Removed hardcoded white background and black foreground
       ),
       body: BlocBuilder<OrderCubit, List<OrderModel>>(
         builder: (context, orders) {
@@ -40,6 +41,7 @@ class OrdersPage extends StatelessWidget {
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                // Card color follows theme
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -48,20 +50,25 @@ class OrdersPage extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("ID: ${order.orderId}",
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+                          Text(
+                              "ID: ${order.orderId}",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.blue[200] : Colors.blueGrey
+                              )
+                          ),
                           Text(formattedPrice,
                               style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 18)),
                         ],
                       ),
                       const Divider(height: 24),
 
-                      _buildDetailRow(Icons.location_on_outlined, "Address", order.address),
+                      _buildDetailRow(Icons.location_on_outlined, "Address", order.address, isDark),
                       const SizedBox(height: 8),
-                      _buildDetailRow(Icons.payment_outlined, "Payment", order.paymentMethod),
+                      _buildDetailRow(Icons.payment_outlined, "Payment", order.paymentMethod, isDark),
                       const SizedBox(height: 8),
                       _buildDetailRow(Icons.calendar_today_outlined, "Date",
-                          DateFormat('dd MMM yyyy, hh:mm a').format(order.orderDate)),
+                          DateFormat('dd MMM yyyy, hh:mm a').format(order.orderDate), isDark),
 
                       const Divider(height: 24),
 
@@ -72,9 +79,11 @@ class OrdersPage extends StatelessWidget {
                         spacing: 8,
                         children: order.items.map((item) => Chip(
                           label: Text(item.product.title, style: const TextStyle(fontSize: 11)),
-                          backgroundColor: Colors.orange[50],
+                          // Dynamic chip background
+                          backgroundColor: isDark ? Colors.orange.withOpacity(0.2) : Colors.orange[50],
                           padding: EdgeInsets.zero,
                           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          side: BorderSide.none,
                         )).toList(),
                       ),
                     ],
@@ -88,7 +97,7 @@ class OrdersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
+  Widget _buildDetailRow(IconData icon, String label, String value, bool isDark) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -97,10 +106,17 @@ class OrdersPage extends StatelessWidget {
         Expanded(
           child: RichText(
             text: TextSpan(
-              style: const TextStyle(color: Colors.black, fontSize: 13),
+              // Base style uses theme's body medium text color
+              style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                  fontSize: 13
+              ),
               children: [
                 TextSpan(text: "$label: ", style: const TextStyle(fontWeight: FontWeight.bold)),
-                TextSpan(text: value, style: const TextStyle(color: Colors.black87)),
+                TextSpan(
+                    text: value,
+                    style: TextStyle(color: isDark ? Colors.grey[300] : Colors.black87)
+                ),
               ],
             ),
           ),

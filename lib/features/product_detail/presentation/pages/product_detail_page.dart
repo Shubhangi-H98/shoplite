@@ -24,16 +24,18 @@ class ProductDetailPage extends StatelessWidget {
       decimalDigits: 0,
     ).format(indianPrice);
 
+    // 🟢 THEME CHECK
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 400,
             pinned: true,
-            backgroundColor: Colors.white,
+            // 🟢 THEME FIX: Removed backgroundColor: Colors.white
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+              icon: const Icon(Icons.arrow_back_ios_new), // Removed color: Colors.black
               onPressed: () {
                 debugPrint("⬅️ [ProductDetail] User pressed back button.");
                 Navigator.pop(context);
@@ -94,7 +96,7 @@ class ProductDetailPage extends StatelessWidget {
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 20),
                       const SizedBox(width: 5),
-                      Text("4.5 (120 Reviews)", style: TextStyle(color: Colors.grey[600])),
+                      Text("4.5 (120 Reviews)", style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600])),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -102,7 +104,7 @@ class ProductDetailPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     "This is a premium quality ${product.title}. It features high-end specifications and is designed for performance and durability.",
-                    style: TextStyle(fontSize: 16, color: Colors.grey[700], height: 1.5),
+                    style: TextStyle(fontSize: 16, color: isDark ? Colors.grey[300] : Colors.grey[700], height: 1.5),
                   ),
                   const SizedBox(height: 100),
                 ],
@@ -115,8 +117,8 @@ class ProductDetailPage extends StatelessWidget {
       bottomSheet: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, -5))],
+          color: isDark ? Colors.grey[900] : Colors.white, // 🟢 THEME FIX for BottomSheet
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -5))],
         ),
         child: Row(
           children: [
@@ -137,7 +139,7 @@ class ProductDetailPage extends StatelessWidget {
                 onPressed: () {
                   debugPrint("🛒 [ProductDetail] 'Add to Cart' clicked for ID: ${product.id}");
                   context.read<CartCubit>().addToCart(product as ProductModel);
-                  _showAddToCartPopup(context, product as ProductModel);
+                  _showAddToCartPopup(context, product as ProductModel, isDark);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
@@ -155,9 +157,10 @@ class ProductDetailPage extends StatelessWidget {
   }
 
   // 🛠️ Reusable Bottom Sheet Popup
-  void _showAddToCartPopup(BuildContext context, ProductModel product) {
+  void _showAddToCartPopup(BuildContext context, ProductModel product, bool isDark) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? Colors.grey[900] : Colors.white, // 🟢 THEME FIX
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
       builder: (context) {
         return Container(

@@ -30,7 +30,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthLoading) {
@@ -53,7 +52,6 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 children: [
                   const SizedBox(height: 60),
-                  // Logo Container with debug info
                   GestureDetector(
                     onLongPress: () => debugPrint("💡 Tip: Use test@test.com / 123456"),
                     child: Center(
@@ -68,14 +66,12 @@ class _LoginPageState extends State<LoginPage> {
                   const Text("Welcome to ShopLite", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 40),
 
-                  // Input Fields
                   _buildTextField(_emailController, "Email", Icons.email_outlined),
                   const SizedBox(height: 20),
                   _buildTextField(_passwordController, "Password", Icons.lock_outline, isPassword: true),
 
                   const SizedBox(height: 40),
 
-                  // Login Button
                   BlocBuilder<AuthCubit, AuthState>(
                     builder: (context, state) {
                       return SizedBox(
@@ -84,12 +80,13 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: state is AuthLoading ? null : _handleLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white, // Ensure text is visible on orange
                             padding: const EdgeInsets.symmetric(vertical: 18),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                           ),
                           child: state is AuthLoading
                               ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                              : const Text("Login", style: TextStyle(fontSize: 18, color: Colors.white)),
+                              : const Text("Login", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         ),
                       );
                     },

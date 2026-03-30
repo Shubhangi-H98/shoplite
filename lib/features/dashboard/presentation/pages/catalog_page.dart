@@ -55,8 +55,9 @@ class _CatalogPageState extends State<CatalogPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
       floatingActionButton: _showBackToTop
           ? FloatingActionButton(
         onPressed: () => _scrollController.animateTo(0,
@@ -75,11 +76,11 @@ class _CatalogPageState extends State<CatalogPage> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: _buildSearchBar(),
+              child: _buildSearchBar(isDark),
             ),
-            _buildCategoryList(),
+            _buildCategoryList(isDark),
             const SizedBox(height: 8),
-            const Divider(height: 1, color: Color(0xFFF5F5F5)),
+            Divider(height: 1, color: isDark ? Colors.grey[800] : const Color(0xFFF5F5F5)),
             Expanded(
               child: BlocBuilder<CatalogCubit, CatalogState>(
                 builder: (context, state) {
@@ -98,10 +99,10 @@ class _CatalogPageState extends State<CatalogPage> {
                     },
                     child: CustomScrollView(
                       controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+                      physics: const AlwaysScrollableScrollPhysics(),
                       slivers: [
                         if (isOffline)
-                          SliverToBoxAdapter(child: _buildOfflineBanner(true)),
+                          SliverToBoxAdapter(child: _buildOfflineBanner(isOffline, isDark)),
                         SliverPadding(
                           padding: const EdgeInsets.all(16),
                           sliver: SliverToBoxAdapter(child: _buildPromoBanner()),
@@ -130,7 +131,7 @@ class _CatalogPageState extends State<CatalogPage> {
                                 childAspectRatio: 0.72,
                               ),
                               delegate: SliverChildBuilderDelegate(
-                                    (context, index) => _buildProductCard(context, displayProducts[index]),
+                                    (context, index) => _buildProductCard(context, displayProducts[index], isDark),
                                 childCount: displayProducts.length,
                               ),
                             ),
@@ -154,28 +155,28 @@ class _CatalogPageState extends State<CatalogPage> {
     );
   }
 
-  Widget _buildOfflineBanner(bool isOffline) {
+  Widget _buildOfflineBanner(bool isOffline, bool isDark) {
     if (!isOffline) return const SizedBox.shrink();
 
     return Container(
       width: double.infinity,
-      color: Colors.red[50],
+      color: isDark ? Colors.red[900]?.withOpacity(0.2) : Colors.red[50],
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cloud_off, color: Colors.red[800], size: 16),
+          Icon(Icons.cloud_off, color: isDark ? Colors.redAccent : Colors.red[800], size: 16),
           const SizedBox(width: 8),
           Text(
             "You are viewing cached data. Check your connection.",
-            style: TextStyle(color: Colors.red[800], fontSize: 12, fontWeight: FontWeight.w500),
+            style: TextStyle(color: isDark ? Colors.redAccent : Colors.red[800], fontSize: 12, fontWeight: FontWeight.w500),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryList() {
+  Widget _buildCategoryList(bool isDark) {
     final categories = ['All', 'Beauty', 'Fragrances', 'Furniture', 'Groceries'];
     return SizedBox(
       height: 45,
@@ -199,11 +200,11 @@ class _CatalogPageState extends State<CatalogPage> {
               },
               selectedColor: Colors.orange,
               labelStyle: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
+                color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black),
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
-              backgroundColor: Colors.grey[100],
+              backgroundColor: isDark ? Colors.grey[800] : Colors.grey[100],
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               showCheckmark: false,
             ),
@@ -213,20 +214,20 @@ class _CatalogPageState extends State<CatalogPage> {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, Product? product) {
+  Widget _buildProductCard(BuildContext context, Product? product, bool isDark) {
     if (product == null) return const SizedBox.shrink();
 
     final double price = product.price ?? 0.0;
     final String formattedPrice = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0).format(price * 83);
-
     final String imageUrl = product.thumbnail ?? '';
 
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailPage(product: product))),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+          color: isDark ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.05), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,11 +242,11 @@ class _CatalogPageState extends State<CatalogPage> {
                       imageUrl: imageUrl,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (context, url) => Container(color: Colors.grey[100]),
+                      placeholder: (context, url) => Container(color: isDark ? Colors.grey[800] : Colors.grey[100]),
                       errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
                     )
                         : Container(
-                      color: Colors.grey[200],
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
                       child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey)),
                     ),
                   ),
@@ -257,7 +258,8 @@ class _CatalogPageState extends State<CatalogPage> {
                         return GestureDetector(
                           onTap: () => context.read<FavoritesCubit>().toggleFavorite(product as ProductModel),
                           child: CircleAvatar(
-                            radius: 14, backgroundColor: Colors.white.withOpacity(0.9),
+                            radius: 14,
+                            backgroundColor: isDark ? Colors.black.withOpacity(0.6) : Colors.white.withOpacity(0.9),
                             child: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: isFav ? Colors.red : Colors.orange),
                           ),
                         );
@@ -272,7 +274,12 @@ class _CatalogPageState extends State<CatalogPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(product.title ?? 'No Title', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  Text(
+                      product.title ?? 'No Title',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -281,7 +288,7 @@ class _CatalogPageState extends State<CatalogPage> {
                       GestureDetector(
                         onTap: () {
                           context.read<CartCubit>().addToCart(product as ProductModel);
-                          _showAddToCartPopup(context, product as ProductModel);
+                          _showAddToCartPopup(context, product as ProductModel, isDark);
                         },
                         child: const Icon(Icons.add_circle, size: 22, color: Colors.orange),
                       ),
@@ -296,19 +303,20 @@ class _CatalogPageState extends State<CatalogPage> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(bool isDark) {
     return Container(
-      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(color: isDark ? Colors.grey[900] : Colors.grey[100], borderRadius: BorderRadius.circular(12)),
       child: TextField(
         onChanged: (val) {
           if (_debounce?.isActive ?? false) _debounce!.cancel();
           _debounce = Timer(const Duration(milliseconds: 500), () => context.read<CatalogCubit>().searchProducts(val));
         },
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           hintText: 'Search products...',
-          prefixIcon: Icon(Icons.search, size: 20, color: Colors.grey),
+          hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey),
+          prefixIcon: Icon(Icons.search, size: 20, color: isDark ? Colors.grey[500] : Colors.grey),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
         ),
       ),
     );
@@ -331,9 +339,10 @@ class _CatalogPageState extends State<CatalogPage> {
     );
   }
 
-  void _showAddToCartPopup(BuildContext context, ProductModel product) {
+  void _showAddToCartPopup(BuildContext context, ProductModel product, bool isDark) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? Colors.grey[900] : Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
       builder: (context) {
         return Container(

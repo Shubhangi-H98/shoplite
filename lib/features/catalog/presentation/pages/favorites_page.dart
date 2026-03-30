@@ -11,8 +11,11 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Theme check
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      // Removed hardcoded white background
       appBar: AppBar(
         title: const Text("My Favorites", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
@@ -61,6 +64,7 @@ class FavoritesPage extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.only(bottom: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                // Card color automatically adapts to theme
                 child: ListTile(
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
@@ -80,7 +84,7 @@ class FavoritesPage extends StatelessWidget {
                         icon: const Icon(Icons.add_shopping_cart, color: Colors.orange),
                         onPressed: () {
                           context.read<CartCubit>().addToCart(product);
-                          _showAddedToCartSheet(context, product);
+                          _showAddedToCartSheet(context, product, isDark);
                         },
                       ),
                       IconButton(
@@ -98,9 +102,11 @@ class FavoritesPage extends StatelessWidget {
     );
   }
 
-  void _showAddedToCartSheet(BuildContext context, ProductModel product) {
+  void _showAddedToCartSheet(BuildContext context, ProductModel product, bool isDark) {
     showModalBottomSheet(
       context: context,
+      // Dynamic background color for the bottom sheet
+      backgroundColor: isDark ? Colors.grey[900] : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),

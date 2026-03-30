@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../../../core/theme/theme_cubit.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../cart/presentation/cubit/favorites_cubit.dart';
 import '../../../cart/presentation/cubit/order_cubit.dart';
@@ -33,7 +35,6 @@ class _ProfilePageState extends State<ProfilePage> {
     if (mounted) setState(() => _savedAddress = address);
   }
 
-  // 🛠️ Image Picker logic
   Future<void> _pickImage(BuildContext context) async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -43,17 +44,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // profile_page.dart
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("My Account", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
       ),
       body: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, authState) {
@@ -67,7 +64,6 @@ class _ProfilePageState extends State<ProfilePage> {
           return ListView(
             padding: const EdgeInsets.symmetric(vertical: 20),
             children: [
-              // Profile Image Section
               Center(
                 child: GestureDetector(
                   onTap: () => _pickImage(context),
@@ -91,7 +87,6 @@ class _ProfilePageState extends State<ProfilePage> {
               Text(email, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 30),
 
-              // Menu Tiles
               _buildMenuTile(Icons.shopping_bag_outlined, "My Orders", () {
                 context.read<NavigationCubit>().changeTab(1);
               }),
@@ -114,6 +109,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   }, trailingText: lastPayment);
                 },
               ),
+
+              BlocBuilder<ThemeCubit, bool>(
+                builder: (context, isDark) {
+                  return SwitchListTile(
+                    title: const Text("Dark Mode", style: TextStyle(fontWeight: FontWeight.w500)),
+                    secondary: Icon(
+                      isDark ? Icons.dark_mode : Icons.light_mode,
+
+                      color: isDark ? Colors.orange : null,
+                    ),
+                    activeColor: Colors.orange,
+                    value: isDark,
+                    onChanged: (value) {
+                      context.read<ThemeCubit>().toggleTheme();
+                    },
+                  );
+                },
+              ),
+
               const Divider(),
               _buildMenuTile(Icons.logout, "Logout", () => _showLogoutDialog(context), textColor: Colors.red),
             ],
@@ -125,7 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildMenuTile(IconData icon, String title, VoidCallback onTap, {Color? textColor, String? trailingText}) {
     return ListTile(
-      leading: Icon(icon, color: textColor ?? Colors.black),
+      leading: Icon(icon, color: textColor),
       title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

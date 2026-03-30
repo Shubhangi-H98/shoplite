@@ -17,17 +17,17 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  // int _selectedIndex = 0;
-
   final List<Widget> _pages = [
-    const CatalogPage(),    // Index 0: Home
-    const CartPage(),       // Index 1: Shopping/Cart
-    const FavoritesPage(),  // Index 2: Market/Favorites
-    const ProfilePage(),    // Index 3: Account/Profile
+    const CatalogPage(),
+    const CartPage(),
+    const FavoritesPage(),
+    const ProfilePage(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthUnauthenticated) {
@@ -38,6 +38,7 @@ class _DashboardPageState extends State<DashboardPage> {
       child: BlocBuilder<NavigationCubit, int>(
         builder: (context, activeIndex) {
           return Scaffold(
+
             body: IndexedStack(
               index: activeIndex,
               children: _pages,
@@ -52,7 +53,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     context.read<NavigationCubit>().changeTab(index);
                   },
                   selectedItemColor: Colors.orange,
-                  unselectedItemColor: Colors.grey,
+                  unselectedItemColor: isDark ? Colors.grey[500] : Colors.grey,
                   showUnselectedLabels: true,
                   type: BottomNavigationBarType.fixed,
                   items: [

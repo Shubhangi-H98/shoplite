@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import 'core/theme/theme_cubit.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/cart/cart/presentation/cubit/cart_cubit.dart';
@@ -63,27 +64,61 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => NavigationCubit()),
         BlocProvider(create: (context) => OrderCubit()),
         BlocProvider(create: (context) => di.sl<ProfilePictureCubit>()),
+        BlocProvider(create: (_) => di.sl<ThemeCubit>()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'ShopLite',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange, primary: Colors.orange),
-          scaffoldBackgroundColor: Colors.white,
-          appBarTheme: const AppBarTheme(backgroundColor: Colors.white, elevation: 0),
-        ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const SplashPage(),
-          '/login': (context) => const LoginPage(),
-          '/dashboard': (context) => const DashboardPage(),
-          '/order-success': (context) => const OrderSuccessPage(),
-        },
-        // Navigation tracking
-        onGenerateRoute: (settings) {
-          debugPrint("🛣️ [Navigator] Route requested: ${settings.name}");
-          return null;
+      child: BlocBuilder<ThemeCubit, bool>(
+        builder: (context, isDarkMode) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'ShopLite',
+
+            // 🟢 LIGHT THEME
+            theme: ThemeData(
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.orange,
+                primary: Colors.orange,
+                brightness: Brightness.light,
+              ),
+              scaffoldBackgroundColor: Colors.white,
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.white,
+                elevation: 0,
+                iconTheme: IconThemeData(color: Colors.black),
+              ),
+            ),
+
+            // 🟢 DARK THEME
+            darkTheme: ThemeData(
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.orange,
+                primary: Colors.orange,
+                brightness: Brightness.dark,
+              ),
+              scaffoldBackgroundColor: const Color(0xFF121212), // Standard dark background
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Color(0xFF121212),
+                elevation: 0,
+                iconTheme: IconThemeData(color: Colors.white),
+              ),
+            ),
+
+            // 🟢 THEME MODE (Toggle Logic)
+            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+
+            initialRoute: '/',
+            routes: {
+              '/': (context) => const SplashPage(),
+              '/login': (context) => const LoginPage(),
+              '/dashboard': (context) => const DashboardPage(),
+              '/order-success': (context) => const OrderSuccessPage(),
+            },
+            onGenerateRoute: (settings) {
+              debugPrint("🛣️ [Navigator] Route requested: ${settings.name}");
+              return null;
+            },
+          );
         },
       ),
     );
