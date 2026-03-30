@@ -1,17 +1,58 @@
-# shoplite
+# 🛒 ShopLite - E-Commerce Catalog App
 
-A new Flutter project.
+A high-performance, **Offline-First** E-commerce catalog application built with Flutter, following **Layered Clean Architecture** and **SOLID principles**.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Key Features Implemented
+- **Layered Clean Architecture**: Strict separation of concerns (Data, Domain, Presentation).
+- **State Management**: Robust state handling using **BLoC/Cubit**.
+- **Smart Caching (Offline First)**: Integrated **Hive** with a **30-minute TTL (Time-To-Live)** strategy to ensure fresh data while allowing offline access.
+- **Dependency Injection**: Decoupled components using **GetIt** for better testability.
+- **Theming**: Full support for **Dynamic Light & Dark Modes**.
+- **Branding**: Customized **Native Splash Screen** and **Launcher Icons**.
+- **Catalog Management**: Real-time Search, Category Filtering, and Pagination logic.
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## 🏗️ Architecture Overview
+The app is divided into three main layers to ensure scalability and maintainability:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+| Layer | Responsibility |
+| :--- | :--- |
+| **Presentation** | UI Widgets, Themes, and BLoC/Cubit for state handling. |
+| **Domain** | Business Logic, Abstract Repositories, and Entities. |
+| **Data** | API implementations (Dio), DTOs (Models), and Local Persistence (Hive). |
+
+---
+
+## 🧪 Testing Strategy
+I have followed a rigorous testing approach to ensure the reliability of critical business logic and UI:
+- **Unit Tests**: Validated the `ProductRepository` logic, covering successful API fetches, Hive caching, and offline fallback mechanisms.
+- **Widget Tests**: Verified the `SplashPage` and `Smoke Tests` for initial app loading and branding presence.
+
+**Current Status:** `All tests passed!` ✅
+
+---
+
+## 🛠️ Tech Stack & Tools
+- **Core**: Flutter SDK
+- **State Management**: flutter_bloc
+- **Networking**: Dio (ApiClient wrapper)
+- **Local Database**: Hive & Hive Flutter
+- **Secure Storage**: Flutter Secure Storage (for Cache Timestamps)
+- **Dependency Injection**: GetIt
+- **Testing**: flutter_test, bloc_test, mocktail
+
+---
+
+## 📂 Project Structure
+```text
+lib/
+├── core/               # Network Client, Common Utils, Global Themes
+├── features/           # Feature-based modular structure
+│   ├── auth/           # Login & Session Management
+│   ├── catalog/        # Product List, Search, & Details
+│   └── splash/         # Branding & Auth Initialization
+├── injection_container.dart # Dependency Injection Setup
+└── main.dart           # App Entry Point & Global Providers
