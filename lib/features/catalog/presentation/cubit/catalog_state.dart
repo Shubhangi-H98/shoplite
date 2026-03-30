@@ -20,13 +20,16 @@ class CatalogLoaded extends CatalogState {
   final List<Product> products;
   final bool hasReachedMax;
 
+  final bool isOffline;
+
   const CatalogLoaded({
     required this.products,
     this.hasReachedMax = false,
+    this.isOffline = false,
   });
 
   @override
-  List<Object?> get props => [products, hasReachedMax];
+  List<Object?> get props => [products, hasReachedMax, isOffline];
 }
 
 // State shown when an error occurs.

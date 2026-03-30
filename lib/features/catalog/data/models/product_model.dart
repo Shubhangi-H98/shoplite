@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 import '../../domain/entities/product.dart';
 part 'product_model.g.dart';
 
-@HiveType(typeId: 0) // Unique ID for Hive
+@HiveType(typeId: 0)
 class ProductModel extends Product {
   @HiveField(0)
   final int id;
@@ -22,6 +22,9 @@ class ProductModel extends Product {
   @HiveField(5)
   final double rating;
 
+  @HiveField(6)
+  final String? category;
+
   const ProductModel({
     required this.id,
     required this.title,
@@ -29,6 +32,7 @@ class ProductModel extends Product {
     required this.price,
     required this.thumbnail,
     required this.rating,
+    this.category,
   }) : super(
     id: id,
     title: title,
@@ -36,6 +40,7 @@ class ProductModel extends Product {
     price: price,
     thumbnail: thumbnail,
     rating: rating,
+    category: category,
   );
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -46,6 +51,7 @@ class ProductModel extends Product {
       price: (json['price'] as num).toDouble(),
       thumbnail: json['thumbnail'],
       rating: (json['rating'] as num).toDouble(),
+      category: json['category'],
     );
   }
 }

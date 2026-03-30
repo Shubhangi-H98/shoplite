@@ -1,10 +1,4 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'product_model.dart';
-
-// **************************************************************************
-// TypeAdapterGenerator
-// **************************************************************************
 
 class ProductModelAdapter extends TypeAdapter<ProductModel> {
   @override
@@ -23,13 +17,14 @@ class ProductModelAdapter extends TypeAdapter<ProductModel> {
       price: fields[3] as double,
       thumbnail: fields[4] as String,
       rating: fields[5] as double,
+      category: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ProductModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +36,9 @@ class ProductModelAdapter extends TypeAdapter<ProductModel> {
       ..writeByte(4)
       ..write(obj.thumbnail)
       ..writeByte(5)
-      ..write(obj.rating);
+      ..write(obj.rating)
+      ..writeByte(6)
+      ..write(obj.category);
   }
 
   @override
@@ -50,7 +47,7 @@ class ProductModelAdapter extends TypeAdapter<ProductModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ProductModelAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+          other is ProductModelAdapter &&
+              runtimeType == other.runtimeType &&
+              typeId == other.typeId;
 }
