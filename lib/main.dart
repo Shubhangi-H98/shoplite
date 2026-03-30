@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'core/theme/theme_cubit.dart';
@@ -19,6 +20,10 @@ import 'features/splash/presentation/pages/splash_page.dart';
 import 'injection_container.dart' as di;
 
 Future<void> main() async {
+
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   try {
     debugPrint("🚀 [Main] Application Bootstrap Sequence Started.");
     WidgetsFlutterBinding.ensureInitialized();
