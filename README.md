@@ -70,3 +70,18 @@ graph TD
     RepoInterface --> RepoImpl[Data: Repository Implementation]
     RepoImpl --> API[Data: Remote API Source]
     RepoImpl --> Local[Data: Local Hive Storage]
+
+
+## 📱 App Screenshots
+
+| Login & Catalog | Product Detail | Cart & Offline |
+| :-: | :-: | :-: |
+| ![Login](path/to/login.png) | ![Detail](path/to/detail.png) | ![Cart](path/to/cart.png) |
+| *Login & Home* | *Product Details* | *Cart & Offline Banner* |
+
+![login](https://github.com/user-attachments/assets/16185374-aec1-4ae9-ae37-3c8c02779cc7)
+
+
+
+
+
