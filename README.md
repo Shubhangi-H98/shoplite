@@ -56,3 +56,17 @@ lib/
 │   └── splash/         # Branding & Auth Initialization
 ├── injection_container.dart # Dependency Injection Setup
 └── main.dart           # App Entry Point & Global Providers
+
+
+## 🧩 Architecture Diagram (Clean Architecture)
+
+[Image of Flutter Clean Architecture layers: Data, Domain, and Presentation]
+
+```mermaid
+graph TD
+    UI[Presentation: Widgets] --> Cubit[Presentation: Cubit/BLoC]
+    Cubit --> UseCase[Domain: Use Cases]
+    UseCase --> RepoInterface[Domain: Repository Interface]
+    RepoInterface --> RepoImpl[Data: Repository Implementation]
+    RepoImpl --> API[Data: Remote API Source]
+    RepoImpl --> Local[Data: Local Hive Storage]
